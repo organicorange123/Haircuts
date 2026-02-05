@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Amber, be my Valentine?</title>
+  <style>
+    :root { color-scheme: light; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      position: relative;
+      overflow: hidden; /* prevents edges from showing during zoom */
+    }
+
+    /* ✅ Animated background layer (reliable drift + zoom) */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+
+      background-image: url("./background.jpg");
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: 50% 45%;
+
+      transform: scale(1.12);
+      animation: bgDrift 18s ease-in-out infinite alternate;
+      will-change: transform, background-position;
+    }
+
+    @keyframes bgDrift {
+      0% {
+        transform: scale(1.10);
+        background-position: 50% 40%;
+      }
+      100% {
+        transform: scale(1.14);
+        background-position: 50% 52%;
+      }
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.38);
+      z-index: -1;
+    }
+
+    .card {
+      width: min(620px, 92vw);
+      padding: 28px 22px;
+      border-radius: 22px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.18);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+
+      /* Glass effect */
+      background: rgba(255, 192, 203, 0.75);
+      backdrop-filter: blur(12px) saturate(120%);
+      -webkit-backdrop-filter: blur(12px) saturate(120%);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+
+      /* ✅ Placement + animation */
+      transform: translateY(10vh);
+      animation: cardIn 900ms ease-out both, floaty 6s ease-in-out 900ms infinite;
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(12vh) scale(0.98); }
+      to   { opacity: 1; transform: translateY(10vh) scale(1); }
+    }
+
+    @keyframes floaty {
+      0%, 100% { transform: translateY(10vh); }
+      50%      { transform: translateY(8.6vh); }
+    }
+
+    .hearts {
+      position: absolute;
+      inset: -40px -20px auto -20px;
+      height: 140px;
+      opacity: 0.25;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 20% 60%, #ff4d6d 0 14px, transparent 15px),
+        radial-gradient(circle at 26% 44%, #ff4d6d 0 14px, transparent 15px),
+        radial-gradient(circle at 74% 44%, #ff4d6d 0 14px, transparent 15px),
+        radial-gradient(circle at 80% 60%, #ff4d6d 0 14px, transparent 15px),
+        radial-gradient(circle at 44% 70%, #ff8fab 0 12px, transparent 13px),
+        radial-gradient(circle at 56% 70%, #ff8fab 0 12px, transparent 13px);
+    }
+
+    h1 {
+      margin: 18px 0 6px;
+      font-size: clamp(28px, 4vw, 40px);
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      margin: 0 0 18px;
+      color: #444;
+      font-size: 16px;
+      line-height: 1.4;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-size: 16px;
+      font-weight: 650;
+      cursor: pointer;
+      transition: transform .08s ease, box-shadow .2s ease, opacity .2s ease;
+      box-shadow: 0 10px 18px rgba(0,0,0,.10);
+      user-select: none;
+    }
+
+    button:active { transform: translateY(1px) scale(0.99); }
+    #yesBtn { background: #ff4d6d; color: white; }
+    #noBtn  { background: #f2f2f2; color: #222; }
+    #yesBtn:hover { box-shadow: 0 14px 24px rgba(255,77,109,.28); }
+    #noBtn:hover  { opacity: 0.9; }
+
+    .result {
+      margin-top: 18px;
+      font-size: 18px;
+      font-weight: 600;
+      min-height: 28px;
+    }
+
+    .confetti {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .piece {
+      position: absolute;
+      top: -12px;
+      width: 10px;
+      height: 14px;
+      border-radius: 3px;
+      animation: fall linear forwards;
+      opacity: 0.95;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(110vh) rotate(540deg);
+        opacity: 1;
+      }
+    }
+
+    .tiny {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #777;
+    }
+
+    /* optional: respect reduced-motion settings */
+    @media (prefers-reduced-motion: reduce) {
+      body::before { animation: none; }
+      .card { animation: none; transform: translateY(10vh); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="overlay"></div>
+
+  <div class="card" role="main" aria-live="polite">
+    <div class="hearts"></div>
+    <h1>Amber 💖</h1>
+    <p>Will you be my Valentine?</p>
+
+    <div class="buttons">
+      <button id="yesBtn" type="button">Yes!!</button>
+      <button id="noBtn" type="button">No</button>
+    </div>
+
+    <div class="result" id="result"></div>
+    <div class="tiny">Made with love 🫶</div>
+  </div>
+
+  <div class="confetti" id="confetti"></div>
+
+  <audio id="loveSong" src="song.mp3" loop></audio>
+
+  <script>
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const result = document.getElementById("result");
+    const confetti = document.getElementById("confetti");
+
+    const noTexts = [
+      "Are you sure? 🥺",
+      "Really really sure? 😳",
+      "Okay but… think again 💘",
+      "I’ll be extra nice 😇",
+      "Amber pls 😭",
+      "Last chance… 💞"
+    ];
+    let noCount = 0;
+
+    function popConfetti() {
+      confetti.innerHTML = "";
+      const colors = ["#ff4d6d", "#ff8fab", "#ffd6e0", "#ffb3c6", "#ffcad4"];
+      const pieces = 120;
+
+      for (let i = 0; i < pieces; i++) {
+        const div = document.createElement("div");
+        div.className = "piece";
+        div.style.left = Math.random() * 100 + "vw";
+        div.style.background = colors[Math.floor(Math.random() * colors.length)];
+        div.style.animationDuration = (2 + Math.random() * 2.5) + "s";
+        div.style.animationDelay = (Math.random() * 0.4) + "s";
+        div.style.transform = `rotate(${Math.random() * 360}deg)`;
+        confetti.appendChild(div);
+      }
+
+      setTimeout(() => confetti.innerHTML = "", 4500);
+    }
+
+    yesBtn.addEventListener("click", () => {
+      const song = document.getElementById("loveSong");
+      song.volume = 0;
+      song.loop = true;
+      song.play();
+
+      // Smooth fade-in
+      let vol = 0;
+      const target = 0.8;
+      const fade = setInterval(() => {
+        vol += 0.02;
+        if (vol >= target) {
+          song.volume = target;
+          clearInterval(fade);
+        } else {
+          song.volume = vol;
+        }
+      }, 100);
+
+      result.textContent = "YAY!! 💝 I’m a lucky man. YAHOO Thank you baby!";
+      popConfetti();
+      noBtn.disabled = true;
+      yesBtn.textContent = "💘 Chosen 💘";
+    });
+
+    noBtn.addEventListener("click", () => {
+      const scale = 1 + Math.min(0.12 * (noCount + 1), 1.2);
+      yesBtn.style.transform = `scale(${scale})`;
+
+      noBtn.textContent = noTexts[Math.min(noCount, noTexts.length - 1)];
+      noCount++;
+
+      if (noCount >= 3) {
+        const x = (Math.random() * 140) - 70;
+        const y = (Math.random() * 60) - 30;
+        noBtn.style.transform = `translate(${x}px, ${y}px)`;
+      }
+    });
+  </script>
+</body>
+</html>
